@@ -37,14 +37,15 @@ class VideoFolder(torch.utils.data.Dataset):
         imgs = []
         for img_path in img_paths:
             img = self.loader(img_path)
-           # print(type(img))
-            #print(img)
+            #print(type(img))
+            
             #img = np.array(img)
             #img = torch.Tensor(img)
-            #print(img.shape)
             img = self.transform(img)
             imgs.append(torch.unsqueeze(img, 0))
             #print(imgs[0].shape)
+            # current shape of each image is 1,3,100,132
+            # frame, channel, height, width
 
             # 1, 100, 132, 3
 
@@ -54,11 +55,17 @@ class VideoFolder(torch.utils.data.Dataset):
         
         # (N,Cin ,Din , Hin, Win)
         data = torch.cat(imgs)
+        #print(" DATA", data.shape)
+
+
+        #print(" -------- ")
+        # Current shape is D x C x H x W
         # D x 100 x 132 x 3
         # D x C x H x W
         # C x D x H x W
 
-        data = data.permute(3,0,1,2)
+        data = data.permute(1, 0, 2, 3)
+        #print("DATA's SHAPE", data.shape)
         return (data, target_idx)
 
     def __len__(self):
@@ -95,7 +102,7 @@ class VideoFolder(torch.utils.data.Dataset):
 
 if __name__ == '__main__':
     transform = Compose([
-                        CenterCrop(84),
+                        #CenterCrop(84),
                         ToTensor(),
                         # Normalize(
                         #     mean=[0.485, 0.456, 0.406],
@@ -110,6 +117,8 @@ if __name__ == '__main__':
                          is_val=False,
                          transform=transform,
                          loader=default_loader)
+
+    #print(loader[0])
     # data_item, target_idx = loader[0]
     # save_images_for_debug("input_images", data_item.unsqueeze(0))
 
