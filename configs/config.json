@@ -8,9 +8,9 @@
     "val_data_csv": "./annotations/jester-v1-validation.csv",
     "labels_csv": "./annotations/jester-v1-labels.csv",
 
-    "num_workers": 8,
+    "num_workers": 2,
 
-    "output_dir": "trainings/jpeg_model/",
+    "output_dir": "trainings/",
 
     "num_classes": 27,
     "batch_size": 32,

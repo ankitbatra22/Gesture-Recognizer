@@ -13,18 +13,23 @@ def default_loader(path):
 
 class VideoFolder(torch.utils.data.Dataset):
 
-    def __init__(self, root, csv_file_input, csv_file_labels, clip_size,
-                 nclips, step_size, is_val, transform=None,
-                 loader=default_loader):
-        self.dataset_object = JpegDataset(csv_file_input, csv_file_labels, root)
+    def __init__(self, root, 
+                csv_file_input, 
+                csv_file_labels, 
+                clip_size,
+                nclips, 
+                step_size, 
+                is_val, 
+                transform=None,
+                loader=default_loader):
 
+        self.dataset_object = JpegDataset(csv_file_input, csv_file_labels, root)
         self.csv_data = self.dataset_object.csv_data
         self.classes = self.dataset_object.classes
         self.classes_dict = self.dataset_object.classes_dict
         self.root = root
         self.transform = transform
         self.loader = loader
-
         self.clip_size = clip_size
         self.nclips = nclips
         self.step_size = step_size
@@ -38,7 +43,6 @@ class VideoFolder(torch.utils.data.Dataset):
         for img_path in img_paths:
             img = self.loader(img_path)
             #print(type(img))
-            
             #img = np.array(img)
             #img = torch.Tensor(img)
             img = self.transform(img)
@@ -46,18 +50,12 @@ class VideoFolder(torch.utils.data.Dataset):
             #print(imgs[0].shape)
             # current shape of each image is 1,3,100,132
             # frame, channel, height, width
-
-            # 1, 100, 132, 3
-
         target_idx = self.classes_dict[item.label]
 
         # format data to torch
-        
         # (N,Cin ,Din , Hin, Win)
         data = torch.cat(imgs)
         #print(" DATA", data.shape)
-
-
         #print(" -------- ")
         # Current shape is D x C x H x W
         # D x 100 x 132 x 3
@@ -100,7 +98,7 @@ class VideoFolder(torch.utils.data.Dataset):
         return frame_names
 
 
-if __name__ == '__main__':
+"""if __name__ == '__main__':
     transform = Compose([
                         #CenterCrop(84),
                         ToTensor(),
@@ -125,5 +123,4 @@ if __name__ == '__main__':
     train_loader = torch.utils.data.DataLoader(
         loader,
         batch_size=10, shuffle=False,
-        num_workers=5, pin_memory=True)
-
+        num_workers=5, pin_memory=True)"""

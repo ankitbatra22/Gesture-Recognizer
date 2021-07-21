@@ -39,3 +39,4 @@ class JpegDataset(object):
             classes_dict[item] = i
             classes_dict[i] = item
         return classes_dict
+
