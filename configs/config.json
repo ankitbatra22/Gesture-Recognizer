@@ -2,8 +2,8 @@
     "model_name": "gesture-detect",
     "checkpoint": "trainings/jpeg_model/gesture-detect/checkpoint.pth.tar",
 
-    "train_data_folder": "./20bn-jester-v1/",
-    "val_data_folder": "./20bn-jester-v1/",
+    "train_data_folder": "./20bn-jester-v1-sub/",
+    "val_data_folder": "./20bn-jester-v1-sub/",
     "train_data_csv": "./annotations/jester-v1-train.csv",
     "val_data_csv": "./annotations/jester-v1-validation.csv",
     "labels_csv": "./annotations/jester-v1-labels.csv",
