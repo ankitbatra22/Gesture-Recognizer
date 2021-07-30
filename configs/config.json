@@ -12,7 +12,7 @@
 
     "output_dir": "trainings/",
 
-    "num_classes": 27,
+    "num_classes": 11,
     "batch_size": 32,
     "clip_size": 18,
     "nclips": 1,
