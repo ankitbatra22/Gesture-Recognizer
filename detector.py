@@ -36,6 +36,13 @@ print('loading model ...')
 loaded_model = Net()
 loaded_model.load_state_dict(torch.load("july29.pt", map_location='cpu'))
 
+state_dict = torch.load('model_best.pth.tar', map_location='cpu')['state_dict']
+
+state_dict_rename = OrderedDict()
+for k, v in state_dict.items():
+	name = k[7:] # remove 'module.'
+	state_dict_rename[name] = v
+
 print(type(loaded_model))
 
 transform = Compose([

@@ -99,19 +99,21 @@ if __name__ == '__main__':
   
 
   x = next(iter(train_loader))
-  img = (x[0][0].permute(1,2,3,0))
-  print(img.shape)
-  print(img[0].shape)
-  cv2.imshow("IMAGE", img[0].detach().numpy())
-  cv2.waitKey(0)
+  print(x[0])
+  #img = (x[0][0].permute(1,2,3,0))
+  print("LENGTH",len(val_loader))
+  #print(img.shape)
+  #print(img[0].shape)
+  #cv2.imshow("IMAGE", img[0].detach().numpy())
+  #cv2.waitKey(0)
   
 # closing all open windows
-  cv2.destroyAllWindows()
+  #cv2.destroyAllWindows()
   
 
-  criterion = nn.CrossEntropyLoss()
+  #criterion = nn.CrossEntropyLoss()
 
-  EPOCHS = 10
+  #EPOCHS = 10
 
   #net.train()
 

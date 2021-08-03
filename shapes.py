@@ -2,6 +2,21 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+def conv3d_output(shape, Kernel, Padding=(0, 0, 0), Stride=(1, 1, 1)):
+    #Z : depth
+    #Y : height
+    #X : width
+    #P : padding
+    #K : kernel
+
+    Z, Y, X = shape
+    
+    Z_out = ((Z + 2 * Padding[0] - (Kernel[0] - 1) - 1) / Stride[0]) + 1
+    Y_out = ((Y + 2 * Padding[1] - (Kernel[1] - 1) - 1) / Stride[1]) + 1
+    X_out = ((X + 2 * Padding[2] - (Kernel[2] - 1) - 1) / Stride[2]) + 1
+    
+    return (Z_out, Y_out, X_out)
+
 m = nn.Dropout(p=0.2)
 inputs = torch.randn(20, 16)
 output = m(inputs)
