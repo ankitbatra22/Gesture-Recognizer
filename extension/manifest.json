@@ -1,0 +1,21 @@
+{
+    "name": "Gesture Automator Extension",
+    "description": "Augment your chrome experience with hand gestures to make everyday tasks simpler.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": [],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [{
+        "matches": ["<all_urls>"],
+        "js": ["contentScript.js"]
+    }],
+    "web_accessible_resources": [{
+        "resources": ["frame.html", "acquireCamera.js"],
+        "matches": ["<all_urls>"]
+    }]
+}
