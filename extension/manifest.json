@@ -15,7 +15,7 @@
         "js": ["contentScript.js"]
     }],
     "web_accessible_resources": [{
-        "resources": ["frame.html", "acquireCamera.js"],
+        "resources": ["frame.html", "acquireCamera.js", "socket.io.js"],
         "matches": ["<all_urls>"]
     }]
 }

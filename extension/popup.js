@@ -6,15 +6,19 @@ checkCameraPermissions();
 
 function checkCameraPermissions() {
     console.log("checking perms");
-    chrome.runtime.sendMessage({message: "popup-camera-query"}, (response) => {
-        console.log(response);
-        if (response.message == "camera-status") {
-            cameraPermission = response.status;
-            cameraOn = response.cameraOn;
-        } else if (response.message == "camera-status-retry") {
-            setTimeout(checkCameraPermissions, 200);
-        }
-    });
+    chrome.tabs.query({}, tabs => {
+        tabs.forEach(tab => {
+            chrome.tabs.sendMessage(tab.id, {message: "popup-camera-query"}, (response) => {
+                console.log(response);
+                if (response.message == "camera-status-response") {
+                    cameraPermission = response.status;
+                    cameraOn = response.cameraOn;
+                } else if (response.message == "camera-status-retry") {
+                    setTimeout(checkCameraPermissions, 200);
+                }
+            });        
+        });
+    })
 }
 
 function initializeCamera() {
@@ -25,20 +29,10 @@ function initializeCamera() {
     }
 
     if (cameraPermission) {
-        chrome.runtime.sendMessage({message: "popup-camera-initiate", navigator: JSON.stringify(navigator)}, (response) => {
-            if (response.status == "success") {
-                navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
-                    webcamStream = stream;
-                    let vidObj = document.getElementById("webcam-video");
-                    vidObj.srcObject = webcamStream;
-                }).catch(err => {throw(err);});
-                cameraOn = true;
-                document.getElementById("cam-start-btn").style.visibility = "hidden";
-                document.getElementById("cam-stop-btn").style.visibility = "visible";
-            } else {
-                alert("There was an error turning on the webcam");
-                cameraOn = false;
-            }
+        chrome.tabs.query({}, tabs => {
+            tabs.forEach(tab => {
+                chrome.tabs.sendMessage(tab.id, {message: "popup-camera-initiate"}, () => {});
+            });
         });
     } else {
         alert("Gesture Recognizer does not have permission to turn on the camera!");
@@ -56,6 +50,29 @@ function stopCamera() {
         throw("An error has occurred. The camera was not on, and stopCamera was called.");
     }
 }
+
+chrome.runtime.onMessage.addListener(
+    function(req, sender, res) {
+        switch (req.message) {
+            case "init-webcam-status":
+                if (req.status) {
+                    navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
+                        webcamStream = stream;
+                        let vidObj = document.getElementById("webcam-video");
+                        vidObj.srcObject = webcamStream;
+                    }).catch(err => {throw(err);});
+                    cameraOn = true;
+                    document.getElementById("cam-start-btn").style.visibility = "hidden";
+                    document.getElementById("cam-stop-btn").style.visibility = "visible";
+                } else {
+                    alert("There was an error turning on the webcam");
+                    cameraOn = false;
+                }
+                res({});
+                break;
+        }
+    }
+);
 
 document.getElementById("cam-start-btn").addEventListener("click", initializeCamera);
 document.getElementById("cam-stop-btn").addEventListener("click", stopCamera);

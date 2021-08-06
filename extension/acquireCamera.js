@@ -1,3 +1,5 @@
+let socket;
+
 function askForPermissions() {
     navigator.mediaDevices.getUserMedia({video: true, audio: false})
         .then((stream) => {
@@ -22,9 +24,31 @@ function checkPermissions() {
 }
 
 checkPermissions();
+console.log("acquireCamera injected");
+
+function startPredicting(stream) {
+    socket = io('http://localhost:5000');
+
+    socket.on('connect', () => {
+        console.log("successfully connected to flask server");
+    });
+
+
+    
+}
 
 window.addEventListener("message", (event) => {
     if (event.data == "camera-status-request") {
         checkPermissions();
+    } else if (event.data == "start-webcam") {
+        console.log("need to start camera");
+        navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
+            startPredicting(stream);
+            console.log("successful camera start");
+            window.parent.postMessage({message: "init-webcam-status", status: true}, "*");
+        }).catch(err => {
+            console.error(err);
+            window.parent.postMessage({message: "init-webcam-status", status: false}, "*");
+        });
     }
 });
