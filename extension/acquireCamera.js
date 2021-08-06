@@ -34,7 +34,33 @@ function startPredicting(stream) {
     });
 
 
-    
+    const video = document.createElement("video");
+    document.body.appendChild(video);
+
+    video.width = 500; 
+    video.height = 375;
+
+    video.srcObject = stream;
+    video.play();
+
+    let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+    let cap = new cv.VideoCapture(video);
+
+    let canvas = document.createElement("canvas");
+    canvas.id="canvasOutput";
+    document.body.appendChild(canvas);
+    const FPS = 22;
+
+    setInterval(() => {
+        cap.read(src);
+
+        var type = "image/png"
+        var data = canvas.toDataURL(type);
+        data = data.replace('data:' + type + ';base64,', '');
+
+        socket.emit('image', data);
+    }, 10000/FPS);
 }
 
 window.addEventListener("message", (event) => {
