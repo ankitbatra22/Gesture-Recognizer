@@ -18,74 +18,76 @@ pred = 0
 camera = cv2.VideoCapture(0)
 # Define gesture names
 ges = dict()
-ges[0] = 'Sliding Two Fingers Left'
-ges[1] = 'Sliding Two Fingers Right'
-ges[2] = 'Sliding Two Fingers Down'
-ges[3] = 'Sliding Two Fingers Up'
-ges[4] = 'Pushing Two Fingers Away'
-ges[5] = 'Pulling Two Fingers In'
-ges[6] = 'Zooming In With Two Fingers'
-ges[7] = 'Zooming Out With Two Fingers'
-ges[8] = 'Stop Sign'
-ges[9] = 'No gesture'
-ges[10] = 'Doing other things'
+ges[0] = 'Swiping Left'
+ges[1] = 'Swiping Right'
+ges[2] = 'Swiping Down'
+ges[3] = 'Swiping Up'
+ges[4] = 'Stop Sign'
+ges[5] = 'No gesture'
+ges[6] = 'Doing other things'
 
 print('loading model ...')
-#state_dict = torch.load('model_best.pth.tar', map_location='cpu')['state_dict']
 
-loaded_model = Net()
-loaded_model.load_state_dict(torch.load("july29.pt", map_location='cpu'))
-
-state_dict = torch.load('model_best.pth.tar', map_location='cpu')['state_dict']
-
-state_dict_rename = OrderedDict()
-for k, v in state_dict.items():
-	name = k[7:] # remove 'module.'
-	state_dict_rename[name] = v
+loaded_model = Net().cuda()
+loaded_model.load_state_dict(torch.load(
+    "models/latest.pt", map_location='cuda'))
 
 print(type(loaded_model))
 
 transform = Compose([
-        CenterCrop(100),
-        #Resize(size=(300,300)),
-        ToTensor()
-        #Normalize(mean=[0.485, 0.456, 0.406],
-                  #std=[0.229, 0.224, 0.225])
-    ])
+    CenterCrop(100),
+    # Resize(size=(300,300)),
+    ToTensor()
+    # Normalize(mean=[0.485, 0.456, 0.406],
+    # std=[0.229, 0.224, 0.225])
+])
 
 print("predicting...")
 
+tracker = 0
+
 while True:
-	ret, frame = camera.read()
-	#print(np.shape(frame))
+    tracker += 1
+    ret, camera_frame = camera.read()
+    # print(np.shape(frame))
 
-	#resized_frame = cv2.resize(frame, (149, 84)) #why
+    frame = cv2.resize(camera_frame, (160, 120))  # why
 
-	pre_img = Image.fromarray(frame.astype('uint8'), 'RGB')
+    pre_img = Image.fromarray(frame.astype('uint8'), 'RGB')
 
-	img = transform(pre_img)
+    img = transform(pre_img).cuda()
 
-	imgs.append(torch.unsqueeze(img, 0))
-	print(imgs[0])
+    img_numpy = img.permute(1, 2, 0).cpu().detach().numpy()
+    # if keyboard.is_pressed("w"):
+    # 	print("reset")
+    # 	imgs= []
+    # if keyboard.is_pressed("space"):
+    # 	print(len(imgs))
 
-	if len(imgs) == 18:
-		data = torch.cat(imgs)
-		#print(data)
-		data = data.permute(1, 0, 2, 3)
-		output = loaded_model(Variable(data).unsqueeze(0))
-		out = (output.data).cpu().numpy()[0]
-		print('Model output:', out)
-		indices = np.argmax(out)
-		print('Max index:', indices)
-		pred = indices
-		imgs = []
-	
-	cv2.putText(frame, ges[pred],(40,40), cv2.FONT_HERSHEY_SIMPLEX, 1,(0,0,0),2)
-	cv2.imshow('why is it bad',frame)
+    imgs.append(torch.unsqueeze(img, 0))
 
-	if cv2.waitKey(1) & 0xFF == ord('q'):
-		break
+    if len(imgs) == 18:
+        data = torch.cat(imgs)
+        # print(data)
+        data = data.permute(1, 0, 2, 3)
+        output = loaded_model(Variable(data).unsqueeze(0))
+        out = (output.data).cpu().detach().numpy()[0]
+        #print('Model output:', out)
+        indices = np.argmax(out)
+        if indices < 10:
+            tracker = 0
+            print('class:', ges[indices])
+        pred = indices
+
+    if len(imgs) == 18:
+        imgs = imgs[1:]
+
+    cv2.putText(camera_frame, ges[pred], (40, 40),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.imshow('why is it bad', img_numpy)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
 camera.release()
 cv2.destroyAllWindows()
-
