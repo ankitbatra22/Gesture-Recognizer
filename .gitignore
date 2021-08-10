@@ -1,0 +1,10 @@
+20bn-jester-v1/
+.DS_Store
+20bn-jester-v1.zip
+__pycache__/
+20bn-jester-v1-sub.zip
+20bn-jester-v1-sub/
+filename.pickle
+model_best.pth.tar
+july29.pt
+main.py
