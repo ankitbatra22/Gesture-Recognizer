@@ -30,7 +30,7 @@ print('loading model ...')
 
 loaded_model = Net().cuda()
 loaded_model.load_state_dict(torch.load(
-    "models/latest.pt", map_location='cuda'))
+    "models/aug9.pt", map_location='cuda'))
 
 print(type(loaded_model))
 
@@ -74,7 +74,7 @@ while True:
         out = (output.data).cpu().detach().numpy()[0]
         #print('Model output:', out)
         indices = np.argmax(out)
-        if indices < 10:
+        if indices < 5:
             tracker = 0
             print('class:', ges[indices])
         pred = indices
