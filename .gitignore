@@ -7,4 +7,4 @@ __pycache__/
 filename.pickle
 model_best.pth.tar
 july29.pt
-Gesture-Recognizer-Model/main.py
+./Gesture-Recognizer-Model/main.py
