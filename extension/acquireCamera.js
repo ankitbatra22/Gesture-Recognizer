@@ -1,4 +1,25 @@
-let socket;
+console.log("acquireCamera injected");
+// data channel
+var dc = null, dcInterval = null;
+let pc = null;
+pc = createPeerConnection();
+checkPermissions();
+
+function createPeerConnection() {
+    var config = {
+        sdpSemantics: 'unified-plan'
+    };
+
+    pc = new RTCPeerConnection(config);
+
+    // connect audio / video
+    pc.addEventListener('track', function(evt) {
+        if (evt.track.kind == 'video')
+            document.getElementById('video').srcObject = evt.streams[0];
+    });
+
+    return pc;
+}
 
 function askForPermissions() {
     navigator.mediaDevices.getUserMedia({video: true, audio: false})
@@ -23,44 +44,50 @@ function checkPermissions() {
     });
 }
 
-checkPermissions();
-console.log("acquireCamera injected");
+function negotiate() {
+    return pc.createOffer().then(function(offer) {
+        return pc.setLocalDescription(offer);
+    }).then(function() {
+        // wait for ICE gathering to complete
+        return new Promise(function(resolve) {
+            if (pc.iceGatheringState === 'complete') {
+                resolve();
+            } else {
+                function checkState() {
+                    if (pc.iceGatheringState === 'complete') {
+                        pc.removeEventListener('icegatheringstatechange', checkState);
+                        resolve();
+                    }
+                }
+                pc.addEventListener('icegatheringstatechange', checkState);
+            }
+        });
+    }).then(function() {
+        var offer = pc.localDescription;
+        return fetch('http://localhost:8080/offer', {
+            body: JSON.stringify({
+                sdp: offer.sdp,
+                type: offer.type
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: 'POST'
+        });
+    }).then(function(response) {
+        return response.json();
+    }).then(function(answer) {
+        return pc.setRemoteDescription(answer);
+    }).catch(function(e) {
+        alert(e);
+    });
+}
 
 function startPredicting(stream) {
-    socket = io('http://localhost:5000');
-
-    socket.on('connect', () => {
-        console.log("successfully connected to flask server");
+    stream.getTracks().forEach(function(track) {
+        pc.addTrack(track, stream);
     });
-
-
-    const video = document.createElement("video");
-    document.body.appendChild(video);
-
-    video.width = 500; 
-    video.height = 375;
-
-    video.srcObject = stream;
-    video.play();
-
-    let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-    let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
-    let cap = new cv.VideoCapture(video);
-
-    let canvas = document.createElement("canvas");
-    canvas.id="canvasOutput";
-    document.body.appendChild(canvas);
-    const FPS = 22;
-
-    setInterval(() => {
-        cap.read(src);
-
-        var type = "image/png"
-        var data = canvas.toDataURL(type);
-        data = data.replace('data:' + type + ';base64,', '');
-
-        socket.emit('image', data);
-    }, 10000/FPS);
+    return negotiate();
 }
 
 window.addEventListener("message", (event) => {
