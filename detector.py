@@ -23,8 +23,8 @@ ges[1] = 'Swiping Right'
 ges[2] = 'Swiping Down'
 ges[3] = 'Swiping Up'
 ges[4] = 'Stop Sign'
-ges[5] = 'No gesture'
-ges[6] = 'Doing other things'
+ges[5] = 'Doing other things'
+ges[6] = 'No gesture'
 
 print('loading model ...')
 
@@ -74,9 +74,8 @@ while True:
         out = (output.data).cpu().detach().numpy()[0]
         #print('Model output:', out)
         indices = np.argmax(out)
-        if indices < 5:
-            tracker = 0
-            print('class:', ges[indices])
+        tracker = 0
+        print('class:', ges[indices])
         pred = indices
 
     if len(imgs) == 18:
