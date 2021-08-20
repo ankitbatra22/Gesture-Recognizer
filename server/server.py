@@ -1,4 +1,5 @@
 import asyncio
+from dataclasses import dataclass
 import json
 import os
 
@@ -9,6 +10,7 @@ from aiohttp_middlewares import cors_middleware
 from aiortc import RTCPeerConnection, RTCSessionDescription
 
 pcs = set()
+dataChannel = None
 
 async def consume_video(track):
     while True:
@@ -16,6 +18,7 @@ async def consume_video(track):
         img = frame.to_ndarray(format="bgr24")
         cv2.imshow("window", img)
         cv2.waitKey(1)
+        #dataChannel.send(json.dumps({"command": "click"}))
 
 async def offer(request):
     params = await request.json()
@@ -26,10 +29,12 @@ async def offer(request):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
+        global dataChannel
+        dataChannel = channel
         @channel.on("message")
         def on_message(message):
             if isinstance(message, str) and message.startswith("ping"):
-                channel.send("pong" + message[4:])
+                channel.send("pong")
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():

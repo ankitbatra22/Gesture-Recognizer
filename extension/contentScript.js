@@ -25,6 +25,11 @@ window.addEventListener("message", (event) => {
     } else if (event.data.message == "init-webcam-status") {
         chrome.runtime.sendMessage({message: "init-webcam-status", status: event.data.status});
         cameraOn = event.data.status;
+    } else if (event.data.startsWith("{")) {
+        let jsonData = JSON.parse(event.data);
+        if ("command" in jsonData) {
+            console.log(jsonData.command);
+        }
     }
 });
 

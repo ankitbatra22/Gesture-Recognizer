@@ -29,8 +29,14 @@ function createDataChannel() {
         }, 1000);
     };
     dc.onmessage = function(evt) {
-        if (evt.data.substring(0, 4) === 'pong') {
+        if (evt.data === 'pong') {
             console.log("pong");
+        }
+        if (evt.data.startsWith("{")) {
+            let jsonData = JSON.parse(evt.data);
+            if ("command" in jsonData) {
+                window.parent.postMessage(evt.data, "*");
+            }
         }
     };    
 }
