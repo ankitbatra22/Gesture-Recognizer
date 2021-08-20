@@ -1,10 +1,39 @@
 console.log("acquireCamera injected");
 let predictionStream = null;
 // data channel
-var dc = null, dcInterval = null;
+let dc = null, dcInterval = null;
 let pc = null;
+let time_start = null;
 pc = createPeerConnection();
 checkPermissions();
+createDataChannel();
+
+function current_stamp() {
+    if (time_start === null) {
+        time_start = new Date().getTime();
+        return 0;
+    } else {
+        return new Date().getTime() - time_start;
+    }
+}
+
+function createDataChannel() {
+    dc = pc.createDataChannel('chat', {ordered: true});
+    dc.onclose = function() {
+        clearInterval(dcInterval);
+    };
+    dc.onopen = function() {
+        dcInterval = setInterval(function() {
+            var message = 'ping ' + current_stamp();
+            dc.send(message);
+        }, 1000);
+    };
+    dc.onmessage = function(evt) {
+        if (evt.data.substring(0, 4) === 'pong') {
+            console.log("pong");
+        }
+    };    
+}
 
 function createPeerConnection() {
     var config = {
@@ -43,6 +72,32 @@ function checkPermissions() {
             askForPermissions();
         }
     });
+}
+
+function endPeerConnection() {
+    // close data channel
+    if (dc) {
+        dc.close();
+    }
+    
+    // close transceivers
+    if (pc.getTransceivers) {
+        pc.getTransceivers().forEach(function(transceiver) {
+            if (transceiver.stop) {
+                transceiver.stop();
+            }
+        });
+    }
+
+    // close local audio / video
+    pc.getSenders().forEach(function(sender) {
+        sender.track.stop();
+    });
+
+    // close peer connection
+    setTimeout(function() {
+        pc.close();
+    }, 500);    
 }
 
 function negotiate() {
@@ -108,5 +163,6 @@ window.addEventListener("message", (event) => {
     } else if (event.data == "stop-webcam") {
         console.log("need to stop the camera");
         predictionStream.getVideoTracks().forEach(track => track.stop());
+        endPeerConnection();
     }
 });
