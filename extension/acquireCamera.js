@@ -38,7 +38,7 @@ function createDataChannel() {
                 window.parent.postMessage(evt.data, "*");
             }
         }
-    };    
+    };
 }
 
 function createPeerConnection() {
