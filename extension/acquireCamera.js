@@ -1,4 +1,5 @@
 console.log("acquireCamera injected");
+let predictionStream = null;
 // data channel
 var dc = null, dcInterval = null;
 let pc = null;
@@ -97,11 +98,15 @@ window.addEventListener("message", (event) => {
         console.log("need to start camera");
         navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
             startPredicting(stream);
+            predictionStream = stream;
             console.log("successful camera start");
             window.parent.postMessage({message: "init-webcam-status", status: true}, "*");
         }).catch(err => {
             console.error(err);
             window.parent.postMessage({message: "init-webcam-status", status: false}, "*");
         });
+    } else if (event.data == "stop-webcam") {
+        console.log("need to stop the camera");
+        predictionStream.getVideoTracks().forEach(track => track.stop());
     }
 });

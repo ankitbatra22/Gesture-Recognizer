@@ -45,6 +45,12 @@ chrome.runtime.onMessage.addListener(
                 innerWindow.postMessage("start-webcam", "*");
                 res({});
                 break;
+            case "popup-camera-stop":
+                console.log("asking to stop the camera");
+                innerWindow.postMessage("stop-webcam", "*");
+                cameraOn = false;
+                res({});
+                break;
         }
     }
 );
