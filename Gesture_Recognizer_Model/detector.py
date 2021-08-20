@@ -10,6 +10,68 @@ from torch.autograd import Variable
 from torchvision.transforms import *
 from model import Net
 
+
+class Detector():
+    def __init__(self) -> None:
+        self.seq_len = 18
+        self.imgs = []
+        ges = dict()
+        ges[0] = 'Swiping Left'
+        ges[1] = 'Swiping Right'
+        ges[2] = 'Swiping Down'
+        ges[3] = 'Swiping Up'
+        ges[4] = 'Stop Sign'
+        ges[5] = 'No gesture'
+        ges[6] = 'Doing other ths'
+        self.ges = ges
+
+        self.model = loaded_model()
+        self.transform = create_transforms()
+
+    def add_frame(self, img):
+
+        if len(self.imgs) > self.seq_len:
+            self.imgs = self.imgs[1:]
+
+        self.imgs.append(torch.unsqueeze(resize_input(img), 0))
+
+    def predict_on_frames(self):
+        data = torch.cat(self.imgs)
+        data = data.permute(1, 0, 2, 3)
+        output = loaded_model(data.unsqueeze(0))
+        out = (output.data).cpu().detach().numpy()[0]
+        #print('Model output:', out)
+        indices = np.argmax(out)
+        if indices < 5:
+            print('class:', ges[indices])
+
+
+def resize_input(img):
+    frame = cv2.resize(img, (160, 120))  # why
+
+    pre_img = Image.fromarray(frame.astype('uint8'), 'RGB')
+
+    img = transform(pre_img).cuda()
+    return img
+
+
+def load_model():
+    print('loading model ...')
+
+    loaded_model = Net().cuda()
+    loaded_model.load_state_dict(torch.load(
+        "models/aug9.pt", map_location='cuda'))
+    return loaded_model
+
+
+def create_transforms():
+    transform = Compose([
+        CenterCrop(100),
+        ToTensor()
+    ])
+    return transform
+
+
 seq_len = 18
 imgs = []
 pred = 0
@@ -70,7 +132,7 @@ while True:
         data = torch.cat(imgs)
         # print(data)
         data = data.permute(1, 0, 2, 3)
-        output = loaded_model(Variable(data).unsqueeze(0))
+        output = loaded_model(data.unsqueeze(0))
         out = (output.data).cpu().detach().numpy()[0]
         #print('Model output:', out)
         indices = np.argmax(out)

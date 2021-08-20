@@ -9,16 +9,27 @@ from aiohttp_middlewares import cors_middleware
 
 from aiortc import RTCPeerConnection, RTCSessionDescription
 
+
+from Gesture_Recognizer_Model.detector import Detector
+
 pcs = set()
 dataChannel = None
+
+detector = Detector()
+
 
 async def consume_video(track):
     while True:
         frame = await track.recv()
         img = frame.to_ndarray(format="bgr24")
+
+        detector.add_frame(img)
+        detector.predict_on_frames()
+
         cv2.imshow("window", img)
         cv2.waitKey(1)
         #dataChannel.send(json.dumps({"command": "click"}))
+
 
 async def offer(request):
     params = await request.json()
@@ -31,6 +42,7 @@ async def offer(request):
     def on_datachannel(channel):
         global dataChannel
         dataChannel = channel
+
         @channel.on("message")
         def on_message(message):
             if isinstance(message, str) and message.startswith("ping"):
@@ -50,7 +62,7 @@ async def offer(request):
         @track.on("ended")
         async def on_ended():
             print("stream ended")
-    
+
     # handle offer
     await pc.setRemoteDescription(offer)
 
