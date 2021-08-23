@@ -9,11 +9,14 @@ from aiohttp_middlewares import cors_middleware
 
 from aiortc import RTCPeerConnection, RTCSessionDescription
 
+import sys
+sys.path.insert(0, r'C:\Users\adity\Desktop\Gesture_Recognizer\Gesture_Recognizer_Model')
 
-from Gesture_Recognizer_Model.detector import Detector
+from detector import Detector
 
 pcs = set()
 dataChannel = None
+
 
 detector = Detector()
 
