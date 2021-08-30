@@ -10,7 +10,11 @@ from aiohttp_middlewares import cors_middleware
 from aiortc import RTCPeerConnection, RTCSessionDescription
 
 import sys
-sys.path.insert(0, r'C:\Users\adity\Desktop\Gesture_Recognizer\Gesture_Recognizer_Model')
+#sys.path.insert(0, r'C:\Users\adity\Desktop\Gesture_Recognizer\Gesture_Recognizer_Model')
+user_path = os.getcwd()
+path_required = os.path.join(user_path.split('/server')[0], "Gesture_Recognizer_Model")
+#print(path_required)
+sys.path.insert(0, path_required)
 
 from detector import Detector
 
