@@ -53,7 +53,7 @@ function stopCamera() {
                     cameraOn = false;
                 });
             });
-        })    
+        })
     } else {
         throw("An error has occurred. The camera was not on, and stopCamera was called.");
     }
