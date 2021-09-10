@@ -60,6 +60,11 @@ body {
 h1 {
   color: white;
   text-align: center;
-  padding-bottom: 20px;
+}
 
+.sub-heading {
+  color: white;
+  text-align: center;
+  padding-bottom: 40px;
+  font-size: 1.1em;
 }
