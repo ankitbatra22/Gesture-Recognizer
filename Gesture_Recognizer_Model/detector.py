@@ -9,6 +9,7 @@ import torch
 from torch.autograd import Variable
 from torchvision.transforms import *
 from model import Net
+import torchsummary
 
 
 class Detector():
@@ -54,18 +55,20 @@ class Detector():
 
         pre_img = Image.fromarray(frame.astype('uint8'), 'RGB')
 
-        img = self.transform(pre_img).cuda()
+        img = self.transform(pre_img).cpu()
         return img
 
 
 def load_model():
     print('loading model ...')
 
-    loaded_model = Net().cuda()
+    loaded_model = Net().cpu()
 
     loaded_model.load_state_dict(torch.load(
-        "Gesture_Recognizer_Model/models/aug9.pt", map_location='cuda'))
-    return loaded_model
+        "../Gesture_Recognizer_Model/models/aug9.pt", map_location='cpu'))
+
+    #torchsummary.summary(loaded_model, (3, 18, 100, 100))
+    #32,3,18,84,84
 
 
 def create_transforms():
@@ -158,3 +161,5 @@ while True:
 camera.release()
 cv2.destroyAllWindows()
 """
+
+load_model()

@@ -42,3 +42,5 @@ class Net(nn.Module):
     return x
 
 
+
+print
